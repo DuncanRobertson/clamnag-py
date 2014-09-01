@@ -3,7 +3,9 @@
 # rewrote clamnag.pl in python
 #
 # partly as the way the DB version is reported completely changed, so clamnag.pl had to be re-written
-# and I dont know perl.
+# and I dont know much perl.
+#
+# Duncan Robertson 2009
 #
 
 import os, sys
