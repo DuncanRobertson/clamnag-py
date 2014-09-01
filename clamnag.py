@@ -3,12 +3,16 @@
 # rewrote clamnag.pl in python
 #
 # partly as the way the DB version is reported completely changed, so clamnag.pl had to be re-written
-# and I dont know much perl.
-#
-# Duncan Robertson 2009
+# and I dont know perl.
 #
 
-import os, sys
+import os, sys, DNS
+
+# DNS where we get the current engine and database version:
+currentclamdns = 'current.cvd.clamav.net'
+
+# command to query ClamAV on what engine and database version is installed:
+clamversioncommand = "clamdscan -V"
 
 ERRORS = {
      'OK' : 0,
@@ -18,21 +22,18 @@ ERRORS = {
      'DEPENDENT' : 4
      };
 
-hostcommand        = "host -t txt current.cvd.clamav.net"
-clamversioncommand = "clamdscan -V"
+try:
+   dnsstring = DNS.dnslookup(currentclamdns,"txt")
+except Exception, e:
+   print "ERROR looking up Clam current version record,",currentclamdns,e
+   sys.exit(ERRORS["CRITICAL"])
 
 try:
-   current = os.popen(hostcommand)
-   hostcommandoutput = current.read()
-   shouldbeversions = hostcommandoutput.split('"')[1].split(":")
+   shouldbeversions = dnsstring[0][0].split(":")
 except:
-   print "ERROR getting clam version info from dns: ",hostcommandoutput
+   print "ERROR splitting TXT record returned from DNS",dnsstring
    sys.exit(ERRORS["CRITICAL"])
-
-if current.close() != None:
-   print "ERROR running ",hostcommand
-   sys.exit(ERRORS["CRITICAL"])
-
+   
 
 version = os.popen(clamversioncommand)
 versionlines = version.readlines()
